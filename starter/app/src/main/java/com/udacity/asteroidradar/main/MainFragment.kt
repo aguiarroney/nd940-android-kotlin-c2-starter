@@ -30,14 +30,8 @@ class MainFragment : Fragment() {
         setHasOptionsMenu(true)
 
         viewModel.asteroidList.observe(viewLifecycleOwner, Observer {
-            Log.i("observer", "Observou a mudança")
-            Log.i("observer", "!!!! lista ${it}")
             asteroidAdapter.addAsteroidList(it as ArrayList<Asteroid>)
         })
-
-        binding.btnTeste.setOnClickListener {
-            viewModel.addList()
-        }
 
         return binding.root
     }
