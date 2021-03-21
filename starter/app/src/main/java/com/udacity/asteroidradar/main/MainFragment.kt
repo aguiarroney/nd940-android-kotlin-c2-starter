@@ -29,6 +29,8 @@ class MainFragment : Fragment() {
 
         setHasOptionsMenu(true)
 
+        viewModel.fetchAsteroids()
+
         viewModel.asteroidList.observe(viewLifecycleOwner, Observer {
             asteroidAdapter.addAsteroidList(it as ArrayList<Asteroid>)
         })

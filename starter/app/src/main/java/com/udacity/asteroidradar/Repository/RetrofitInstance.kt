@@ -1,5 +1,6 @@
 package com.udacity.asteroidradar.Repository
 
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.udacity.asteroidradar.Constants
@@ -8,6 +9,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 
 object RetrofitInstance {
 
@@ -22,7 +24,10 @@ object RetrofitInstance {
     }
 
     private val retrofit by lazy {
-        Retrofit.Builder().addConverterFactory(MoshiConverterFactory.create(moshi)).client(client())
+        Retrofit.Builder()
+            .addConverterFactory(ScalarsConverterFactory.create())
+//            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .client(client())
             .baseUrl(Constants.BASE_URL).build()
     }
 
