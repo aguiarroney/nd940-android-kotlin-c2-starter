@@ -11,22 +11,20 @@ import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.R
 import com.udacity.asteroidradar.databinding.FragmentMainBinding
 
-class MainFragment : Fragment() {
+class MainFragment : Fragment(), MainFragmentAdapter.OnAsteroidItemClickListener {
 
     private val viewModel: MainViewModel by lazy {
         ViewModelProvider(this).get(MainViewModel::class.java)
     }
 
     private val asteroidAdapter by lazy {
-        MainFragmentAdapter(AsteroidItemListener { asteroidId ->
-            Toast.makeText(context, "${asteroidId}", Toast.LENGTH_SHORT).show()
-        })
+        MainFragmentAdapter(this)
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         val binding = FragmentMainBinding.inflate(inflater)
         binding.lifecycleOwner = this
 
@@ -52,5 +50,9 @@ class MainFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return true
+    }
+
+    override fun onItemClick(position: Int) {
+        Log.i("onItemClick", "${viewModel.asteroidList.value?.get(position)?.codename}")
     }
 }

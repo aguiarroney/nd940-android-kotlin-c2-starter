@@ -22,7 +22,7 @@ class MainViewModel : ViewModel() {
 
     fun fetchAsteroids() {
         viewModelScope.launch {
-            val response = repository.fetchAsteroids("neo/rest/v1/feed?start_date=2021-03-22&end_date=2021-03-29&api_key=${Constants.API_KEY}")
+            val response = repository.fetchAsteroids("neo/rest/v1/feed?start_date=2021-03-23&end_date=2021-03-30&api_key=${Constants.API_KEY}")
             if(response.isSuccessful){
                 val jsonString = response.body()
                 val json = JSONObject(jsonString)
