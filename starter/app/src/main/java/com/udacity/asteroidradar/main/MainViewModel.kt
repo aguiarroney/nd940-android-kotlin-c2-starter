@@ -19,17 +19,15 @@ class MainViewModel : ViewModel() {
 
     val repository by lazy { Repository() }
 
-    private val listTeste = ArrayList<Asteroid>()
 
     fun fetchAsteroids() {
         viewModelScope.launch {
-            val response = repository.fetchAsteroids("neo/rest/v1/feed?start_date=2021-03-21&end_date=2021-03-28&api_key=${Constants.API_KEY}")
+            val response = repository.fetchAsteroids("neo/rest/v1/feed?start_date=2021-03-22&end_date=2021-03-29&api_key=${Constants.API_KEY}")
             if(response.isSuccessful){
                 val jsonString = response.body()
                 val json = JSONObject(jsonString)
                 val asteroidListFromService = parseAsteroidsJsonResult(json)
                 _asteroidList.value = asteroidListFromService
-                Log.i("fetchAsteroids", "!!!! Lista: ${asteroidListFromService}")
             }
             else{
                 Log.i("erro fetch", "!!!! ${response.body()}")

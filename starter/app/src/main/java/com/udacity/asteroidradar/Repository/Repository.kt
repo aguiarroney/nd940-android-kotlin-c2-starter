@@ -10,4 +10,6 @@ class Repository {
     suspend fun fetchAsteroids(url: String) : Response<String>{
         return RetrofitInstance.nasaApi.fetchAsteroids(url)
     }
+
+//    suspend fun fetchImgOfTheDay(): Response<>
 }

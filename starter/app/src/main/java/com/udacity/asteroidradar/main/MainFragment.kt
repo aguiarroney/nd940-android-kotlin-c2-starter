@@ -3,6 +3,7 @@ package com.udacity.asteroidradar.main
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -16,10 +17,16 @@ class MainFragment : Fragment() {
         ViewModelProvider(this).get(MainViewModel::class.java)
     }
 
-    private val asteroidAdapter by lazy { MainFragmentAdapter()}
+    private val asteroidAdapter by lazy {
+        MainFragmentAdapter(AsteroidItemListener { asteroidId ->
+            Toast.makeText(context, "${asteroidId}", Toast.LENGTH_SHORT).show()
+        })
+    }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val binding = FragmentMainBinding.inflate(inflater)
         binding.lifecycleOwner = this
 
