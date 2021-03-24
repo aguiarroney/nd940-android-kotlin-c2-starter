@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.Constants
+import com.udacity.asteroidradar.DateTimeHelper
 import com.udacity.asteroidradar.Repository.Repository
 import kotlinx.coroutines.launch
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
@@ -29,14 +30,18 @@ class MainViewModel : ViewModel() {
     fun fetchAsteroids() {
         viewModelScope.launch {
             val response =
-                repository.fetchAsteroids("neo/rest/v1/feed?start_date=2021-03-24&end_date=2021-03-31&api_key=${Constants.API_KEY}")
-            if (response.isSuccessful) {
-                val jsonString = response.body()
-                val json = JSONObject(jsonString)
-                val asteroidListFromService = parseAsteroidsJsonResult(json)
-                _asteroidList.value = asteroidListFromService
+                repository.fetchAsteroids("neo/rest/v1/feed?start_date=${DateTimeHelper.getCurrentDay()}&end_date=${DateTimeHelper.getEndDay()}&api_key=${Constants.API_KEY}")
+            if (response != null) {
+                if (response.isSuccessful) {
+                    val jsonString = response.body()
+                    val json = JSONObject(jsonString)
+                    val asteroidListFromService = parseAsteroidsJsonResult(json)
+                    _asteroidList.value = asteroidListFromService
+                } else {
+                    Log.i("erro fetch", "!!!! ${response.body()}")
+                }
             } else {
-                Log.i("erro fetch", "!!!! ${response.body()}")
+                Log.i("time outr", "!!!! time out")
             }
         }
     }
@@ -44,7 +49,7 @@ class MainViewModel : ViewModel() {
     fun fetchPichOfTheDay() {
         viewModelScope.launch {
             val response =
-                repository.fetchImgOfTheDay("https://api.nasa.gov/planetary/apod?api_key=${Constants.API_KEY}")
+                repository.fetchImgOfTheDay("planetary/apod?api_key=${Constants.API_KEY}")
             if (response.isSuccessful) {
                 val jsonString = response.body()
                 val json = JSONObject(jsonString)
