@@ -3,11 +3,11 @@ package com.udacity.asteroidradar.main
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.squareup.picasso.Picasso
 import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.R
 import com.udacity.asteroidradar.databinding.FragmentMainBinding
@@ -35,7 +35,14 @@ class MainFragment : Fragment(), MainFragmentAdapter.OnAsteroidItemClickListener
 
         setHasOptionsMenu(true)
 
+        viewModel.fetchPichOfTheDay()
         viewModel.fetchAsteroids()
+
+        viewModel.pictureOfDay.observe(viewLifecycleOwner, Observer {
+            it?.let {
+                Picasso.with(context).load(it).into(binding.activityMainImageOfTheDay)
+            }
+        })
 
         viewModel.asteroidList.observe(viewLifecycleOwner, Observer {
             asteroidAdapter.addAsteroidList(it as ArrayList<Asteroid>)
@@ -44,7 +51,8 @@ class MainFragment : Fragment(), MainFragmentAdapter.OnAsteroidItemClickListener
         viewModel.navigationToDetail.observe(viewLifecycleOwner, Observer { id ->
             id?.let {
                 val asteroid: Asteroid? = viewModel.asteroidList.value?.get(id.toInt())
-                this.findNavController().navigate(MainFragmentDirections.actionMainFragmentToDetailFragment(asteroid!!))
+                this.findNavController()
+                    .navigate(MainFragmentDirections.actionMainFragmentToDetailFragment(asteroid!!))
                 viewModel.onNavigationEnd()
             }
         })

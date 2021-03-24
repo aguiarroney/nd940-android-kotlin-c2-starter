@@ -11,4 +11,7 @@ import retrofit2.http.Url
 interface NasaApi {
     @GET
     suspend fun fetchAsteroids(@Url url: String): Response<String>
+
+    @GET
+    suspend fun fetchImgOfTheDay(@Url url: String): Response<String>
 }
