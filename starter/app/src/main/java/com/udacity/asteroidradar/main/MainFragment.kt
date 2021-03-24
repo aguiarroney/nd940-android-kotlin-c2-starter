@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.R
 import com.udacity.asteroidradar.databinding.FragmentMainBinding
@@ -40,6 +41,14 @@ class MainFragment : Fragment(), MainFragmentAdapter.OnAsteroidItemClickListener
             asteroidAdapter.addAsteroidList(it as ArrayList<Asteroid>)
         })
 
+        viewModel.navigationToDetail.observe(viewLifecycleOwner, Observer { id ->
+            id?.let {
+                val asteroid: Asteroid? = viewModel.asteroidList.value?.get(id.toInt())
+                this.findNavController().navigate(MainFragmentDirections.actionMainFragmentToDetailFragment(asteroid!!))
+                viewModel.onNavigationEnd()
+            }
+        })
+
         return binding.root
     }
 
@@ -52,7 +61,8 @@ class MainFragment : Fragment(), MainFragmentAdapter.OnAsteroidItemClickListener
         return true
     }
 
-    override fun onItemClick(position: Int) {
-        Log.i("onItemClick", "${viewModel.asteroidList.value?.get(position)?.codename}")
+    override fun onItemClick(position: Long) {
+        Log.i("onItemClick", "${viewModel.asteroidList.value?.get(position.toInt())?.codename}")
+        viewModel.navigationToDetail.value = position
     }
 }

@@ -26,7 +26,7 @@ class MainFragmentAdapter(private val listener: OnAsteroidItemClickListener) :
         override fun onClick(view: View?) {
             val position = adapterPosition
             if (position != RecyclerView.NO_POSITION) {
-                listener.onItemClick(position)
+                listener.onItemClick(position.toLong())
             }
         }
     }
@@ -56,7 +56,7 @@ class MainFragmentAdapter(private val listener: OnAsteroidItemClickListener) :
     }
 
     interface OnAsteroidItemClickListener {
-        fun onItemClick(position: Int)
+        fun onItemClick(position: Long)
     }
 }
 

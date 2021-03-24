@@ -17,6 +17,9 @@ class MainViewModel : ViewModel() {
     private val _asteroidList = MutableLiveData<List<Asteroid>>()
     val asteroidList: LiveData<List<Asteroid>> = _asteroidList
 
+    private val _navigationToDetial = MutableLiveData<Long>()
+    val navigationToDetail get() = _navigationToDetial
+
     val repository by lazy { Repository() }
 
 
@@ -33,6 +36,10 @@ class MainViewModel : ViewModel() {
                 Log.i("erro fetch", "!!!! ${response.body()}")
             }
         }
+    }
+
+    fun onNavigationEnd(){
+        _navigationToDetial.value = null
     }
 
 }
