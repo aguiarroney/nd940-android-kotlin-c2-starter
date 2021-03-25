@@ -1,10 +1,12 @@
 package com.udacity.asteroidradar.main
 
+import android.app.Application
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.squareup.picasso.Picasso
@@ -15,7 +17,11 @@ import com.udacity.asteroidradar.databinding.FragmentMainBinding
 class MainFragment : Fragment(), MainFragmentAdapter.OnAsteroidItemClickListener {
 
     private val viewModel: MainViewModel by lazy {
-        ViewModelProvider(this).get(MainViewModel::class.java)
+        ViewModelProvider(
+            this, MainViewModel.Factory(
+                requireActivity().application
+            )
+        ).get(MainViewModel::class.java)
     }
 
     private val asteroidAdapter by lazy {
