@@ -44,6 +44,18 @@ class MainFragment : Fragment(), MainFragmentAdapter.OnAsteroidItemClickListener
         viewModel.fetchPicOfTheDayFromDB()
         viewModel.fetchAsteroidsFromDB()
 
+        viewModel.fetchingAsteroidOnlineStatus.observe(viewLifecycleOwner, Observer {
+            if (it) {
+                viewModel.fetchAsteroidsFromDB()
+            }
+        })
+
+        viewModel.fetchingPicOnlineStatus.observe(viewLifecycleOwner, Observer {
+            if (it) {
+                viewModel.fetchPicOfTheDayFromDB()
+            }
+        })
+
         viewModel.pictureOfDay.observe(viewLifecycleOwner, Observer {
             it?.let {
                 Picasso.with(context).load(it).into(binding.activityMainImageOfTheDay)

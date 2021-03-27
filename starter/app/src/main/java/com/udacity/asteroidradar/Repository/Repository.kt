@@ -14,8 +14,8 @@ import org.json.JSONObject
 class Repository(private val asteroidDataBase: AsteroidDataBase) {
 
 
-    suspend fun fetchAsteroidsOnline(url: String) {
-        withContext(Dispatchers.IO) {
+    suspend fun fetchAsteroidsOnline(url: String): Boolean {
+        return withContext(Dispatchers.IO) {
             val response = RetrofitInstance.nasaApi.fetchAsteroidsOnline(url)
             if (response.isSuccessful) {
                 val jsonString = response.body()
@@ -34,7 +34,9 @@ class Repository(private val asteroidDataBase: AsteroidDataBase) {
                     )
                 })
                 Log.i("DATABASE", "Inseriu no DB")
+                return@withContext true
             }
+            return@withContext false
         }
 
     }
@@ -56,8 +58,8 @@ class Repository(private val asteroidDataBase: AsteroidDataBase) {
         }
     }
 
-    suspend fun fetchImgOfTheDayOnline(url: String) {
-        withContext(Dispatchers.IO) {
+    suspend fun fetchImgOfTheDayOnline(url: String) : Boolean {
+        return withContext(Dispatchers.IO) {
             val response = RetrofitInstance.nasaApi.fetchImgOfTheDay(url)
             if (response.isSuccessful) {
                 val jsonString = response.body()
@@ -70,9 +72,10 @@ class Repository(private val asteroidDataBase: AsteroidDataBase) {
                 )
                 asteroidDataBase.pictureOfTheDayDAO.insert(pic)
                 Log.i("img fetch", "inseriu")
-            } else {
-                Log.i("img fetch", "${response.code()}")
+                return@withContext true
             }
+
+            return@withContext false
         }
     }
 

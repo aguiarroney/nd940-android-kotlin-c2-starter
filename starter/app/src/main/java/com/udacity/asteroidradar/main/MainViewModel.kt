@@ -12,6 +12,9 @@ import kotlinx.coroutines.launch
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
 import org.json.JSONObject
 import com.udacity.asteroidradar.db.AsteroidDataBase.Companion.getInstance
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.Dispatcher
 
 class MainViewModel(private val app: Application) : AndroidViewModel(app) {
 
@@ -26,41 +29,48 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
     private val _picOfTheDayUrl = MutableLiveData<String>()
     val pictureOfDay get() = _picOfTheDayUrl
 
+    // holds the status of a online fetching
+    private val _fetchingAsteroidOnlineStatus = MutableLiveData<Boolean>()
+    val fetchingAsteroidOnlineStatus get() = _fetchingAsteroidOnlineStatus
+
+    // holds the status of a picture of the day online fetching
+    private val _fetchingPicOnlineStatus = MutableLiveData<Boolean>()
+    val fetchingPicOnlineStatus get() = _fetchingPicOnlineStatus
+
     val repository: Repository by lazy {
         val database = getInstance(getApplication())
         Repository(database)
     }
 
 
-    private fun _fetchAsteroidsOnline() {
-        viewModelScope.launch {
+    private suspend fun _fetchAsteroidsOnline(): Boolean {
+        return withContext(Dispatchers.Main) {
             repository.fetchAsteroidsOnline("neo/rest/v1/feed?start_date=${DateTimeHelper.getCurrentDay()}&end_date=${DateTimeHelper.getEndDay()}&api_key=${Constants.API_KEY}")
         }
     }
 
     fun fetchAsteroidsFromDB() {
         viewModelScope.launch {
-            var list = repository.fetchAsterodoisFromDB()
+            val list = repository.fetchAsterodoisFromDB()
             if (list.isNullOrEmpty()) {
-                _fetchAsteroidsOnline()
+                _fetchingAsteroidOnlineStatus.value = _fetchAsteroidsOnline()
+            } else {
+                _asteroidList.value = list
             }
-            list = repository.fetchAsterodoisFromDB()
-            _asteroidList.value = list
         }
     }
 
-    private fun _fetchPicOfTheDay() {
-        viewModelScope.launch {
-           repository.fetchImgOfTheDayOnline("planetary/apod?api_key=${Constants.API_KEY}")
+    private suspend fun _fetchPicOfTheDay(): Boolean {
+        return withContext(Dispatchers.Main) {
+            repository.fetchImgOfTheDayOnline("planetary/apod?api_key=${Constants.API_KEY}")
         }
     }
 
-    fun fetchPicOfTheDayFromDB(){
+    fun fetchPicOfTheDayFromDB() {
         viewModelScope.launch {
             var img: PictureOfDay? = repository.fetchImgOfTheDayFromDB()
-            Log.i("imagem", "${img}")
-            if(img == null){
-                _fetchPicOfTheDay()
+            if (img == null) {
+                _fetchingPicOnlineStatus.value = _fetchPicOfTheDay()
             }
             img = repository.fetchImgOfTheDayFromDB()
             _picOfTheDayUrl.value = img?.url.toString()
