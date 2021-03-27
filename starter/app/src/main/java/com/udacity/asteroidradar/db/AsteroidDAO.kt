@@ -15,9 +15,12 @@ interface AsteroidDAO {
     @Query("SELECT * FROM asteroid_table WHERE id = :key")
     fun getAsteroid(key: Long): AsteroidEntity?
 
-    @Query("SELECT * FROM asteroid_table ORDER BY id DESC")
+    @Query("SELECT * FROM asteroid_table ORDER BY date(close_approach_date) ASC")
     fun getAllAsteroids(): List<AsteroidEntity>?
 
     @Query("DELETE FROM asteroid_table")
     fun clear()
+
+    @Query("DELETE FROM asteroid_table WHERE date(close_approach_date) < date(:today)")
+    fun deleteOldData(today: String)
 }

@@ -1,12 +1,6 @@
 package com.udacity.asteroidradar.Repository
 
-import android.app.Application
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.Network
-import android.net.NetworkInfo
 import android.util.Log
-import androidx.core.content.ContextCompat.getSystemService
 import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.Constants
 import com.udacity.asteroidradar.DateTimeHelper
@@ -18,6 +12,7 @@ import com.udacity.asteroidradar.db.PictureOfTheDayEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import timber.log.Timber
 
 class Repository(private val asteroidDataBase: AsteroidDataBase) {
 
@@ -86,7 +81,7 @@ class Repository(private val asteroidDataBase: AsteroidDataBase) {
                         json["url"].toString()
                     )
                     asteroidDataBase.pictureOfTheDayDAO.insert(pic)
-                    Log.i("img fetch", "inseriu")
+                    Timber.i("inseriu")
                     return@withContext true
                 }
 
@@ -103,6 +98,12 @@ class Repository(private val asteroidDataBase: AsteroidDataBase) {
                 asteroidDataBase.pictureOfTheDayDAO.getPicFromDB()
                     ?: return@withContext null
             return@withContext PictureOfDay(picEntity.mediaType, picEntity.title, picEntity.url)
+        }
+    }
+
+    suspend fun deledOldDataFromDB (){
+        withContext(Dispatchers.IO){
+            asteroidDataBase.asteroidDao.deleteOldData(DateTimeHelper.getCurrentDay())
         }
     }
 }

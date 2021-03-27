@@ -22,6 +22,7 @@ class RefreshDataWork(appContext: Context, params: WorkerParameters) :
         return try {
             repository.fetchAsteroidsOnline()
             repository.fetchImgOfTheDayOnline()
+            repository.deledOldDataFromDB()
             Result.success()
         } catch (e: HttpException) {
             Result.retry()
