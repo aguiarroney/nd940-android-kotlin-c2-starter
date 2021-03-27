@@ -13,8 +13,6 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 
 object RetrofitInstance {
 
-    private val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-
     private fun client(): OkHttpClient {
         val logging = HttpLoggingInterceptor()
         logging.level = HttpLoggingInterceptor.Level.BODY
@@ -26,7 +24,6 @@ object RetrofitInstance {
     private val retrofit by lazy {
         Retrofit.Builder()
             .addConverterFactory(ScalarsConverterFactory.create())
-//            .addConverterFactory(MoshiConverterFactory.create(moshi))
             .client(client())
             .baseUrl(Constants.BASE_URL).build()
     }

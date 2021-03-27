@@ -1,7 +1,15 @@
 package com.udacity.asteroidradar.Repository
 
+import android.app.Application
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkInfo
 import android.util.Log
+import androidx.core.content.ContextCompat.getSystemService
 import com.udacity.asteroidradar.Asteroid
+import com.udacity.asteroidradar.Constants
+import com.udacity.asteroidradar.DateTimeHelper
 import com.udacity.asteroidradar.PictureOfDay
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
 import com.udacity.asteroidradar.db.AsteroidDataBase
@@ -14,29 +22,34 @@ import org.json.JSONObject
 class Repository(private val asteroidDataBase: AsteroidDataBase) {
 
 
-    suspend fun fetchAsteroidsOnline(url: String): Boolean {
-        return withContext(Dispatchers.IO) {
-            val response = RetrofitInstance.nasaApi.fetchAsteroidsOnline(url)
-            if (response.isSuccessful) {
-                val jsonString = response.body()
-                val json = JSONObject(jsonString)
-                val asteroidListFromService = parseAsteroidsJsonResult(json)
-                asteroidDataBase.asteroidDao.insert(asteroidListFromService.map {
-                    AsteroidEntity(
-                        id = it.id,
-                        codename = it.codename,
-                        closeApproachDate = it.closeApproachDate,
-                        absoluteMagnitude = it.absoluteMagnitude,
-                        estimatedDiameter = it.estimatedDiameter,
-                        relativeVelocity = it.relativeVelocity,
-                        distanceFromEarth = it.distanceFromEarth,
-                        isPotentiallyHazardous = it.isPotentiallyHazardous
-                    )
-                })
-                Log.i("DATABASE", "Inseriu no DB")
-                return@withContext true
+    suspend fun fetchAsteroidsOnline(): Boolean {
+        return try {
+            withContext(Dispatchers.IO) {
+                val response =
+                    RetrofitInstance.nasaApi.fetchAsteroidsOnline("neo/rest/v1/feed?start_date=${DateTimeHelper.getCurrentDay()}&end_date=${DateTimeHelper.getEndDay()}&api_key=${Constants.API_KEY}")
+                if (response.isSuccessful) {
+                    val jsonString = response.body()
+                    val json = JSONObject(jsonString)
+                    val asteroidListFromService = parseAsteroidsJsonResult(json)
+                    asteroidDataBase.asteroidDao.insert(asteroidListFromService.map {
+                        AsteroidEntity(
+                            id = it.id,
+                            codename = it.codename,
+                            closeApproachDate = it.closeApproachDate,
+                            absoluteMagnitude = it.absoluteMagnitude,
+                            estimatedDiameter = it.estimatedDiameter,
+                            relativeVelocity = it.relativeVelocity,
+                            distanceFromEarth = it.distanceFromEarth,
+                            isPotentiallyHazardous = it.isPotentiallyHazardous
+                        )
+                    })
+                    Log.i("DATABASE", "Inseriu no DB")
+                    return@withContext true
+                }
+                return@withContext false
             }
-            return@withContext false
+        } catch (e: Throwable) {
+            return false
         }
 
     }
@@ -58,24 +71,29 @@ class Repository(private val asteroidDataBase: AsteroidDataBase) {
         }
     }
 
-    suspend fun fetchImgOfTheDayOnline(url: String) : Boolean {
-        return withContext(Dispatchers.IO) {
-            val response = RetrofitInstance.nasaApi.fetchImgOfTheDay(url)
-            if (response.isSuccessful) {
-                val jsonString = response.body()
-                val json = JSONObject(jsonString)
-                val pic = PictureOfTheDayEntity(
-                    1,
-                    json["media_type"].toString(),
-                    json["title"].toString(),
-                    json["url"].toString()
-                )
-                asteroidDataBase.pictureOfTheDayDAO.insert(pic)
-                Log.i("img fetch", "inseriu")
-                return@withContext true
-            }
+    suspend fun fetchImgOfTheDayOnline(): Boolean {
+        return try {
+            withContext(Dispatchers.IO) {
+                val response =
+                    RetrofitInstance.nasaApi.fetchImgOfTheDay("planetary/apod?api_key=${Constants.API_KEY}")
+                if (response.isSuccessful) {
+                    val jsonString = response.body()
+                    val json = JSONObject(jsonString)
+                    val pic = PictureOfTheDayEntity(
+                        1,
+                        json["media_type"].toString(),
+                        json["title"].toString(),
+                        json["url"].toString()
+                    )
+                    asteroidDataBase.pictureOfTheDayDAO.insert(pic)
+                    Log.i("img fetch", "inseriu")
+                    return@withContext true
+                }
 
-            return@withContext false
+                return@withContext false
+            }
+        } catch (e: Throwable) {
+            return false
         }
     }
 

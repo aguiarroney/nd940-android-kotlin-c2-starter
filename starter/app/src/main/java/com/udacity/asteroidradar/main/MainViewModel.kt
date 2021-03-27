@@ -45,7 +45,7 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
 
     private suspend fun _fetchAsteroidsOnline(): Boolean {
         return withContext(Dispatchers.Main) {
-            repository.fetchAsteroidsOnline("neo/rest/v1/feed?start_date=${DateTimeHelper.getCurrentDay()}&end_date=${DateTimeHelper.getEndDay()}&api_key=${Constants.API_KEY}")
+            repository.fetchAsteroidsOnline()
         }
     }
 
@@ -62,7 +62,7 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
 
     private suspend fun _fetchPicOfTheDay(): Boolean {
         return withContext(Dispatchers.Main) {
-            repository.fetchImgOfTheDayOnline("planetary/apod?api_key=${Constants.API_KEY}")
+            repository.fetchImgOfTheDayOnline()
         }
     }
 
