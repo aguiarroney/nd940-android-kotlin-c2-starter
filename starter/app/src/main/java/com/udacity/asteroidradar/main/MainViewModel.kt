@@ -10,6 +10,7 @@ import com.udacity.asteroidradar.Repository.Repository
 import kotlinx.coroutines.launch
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
 import org.json.JSONObject
+import com.udacity.asteroidradar.db.AsteroidDataBase.Companion.getInstance
 
 class MainViewModel(private val app: Application) : AndroidViewModel(app) {
 
@@ -22,24 +23,23 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
     private val _picOfTheDayUrl = MutableLiveData<String>()
     val pictureOfDay get() = _picOfTheDayUrl
 
-    val repository by lazy { Repository() }
+    val repository:Repository by lazy {
+        val database = getInstance(getApplication())
+        Repository(database)
+    }
 
 
-    fun fetchAsteroids() {
+    fun fetchAsteroidsOnline() {
         viewModelScope.launch {
-            val response =
-                repository.fetchAsteroids("neo/rest/v1/feed?start_date=${DateTimeHelper.getCurrentDay()}&end_date=${DateTimeHelper.getEndDay()}&api_key=${Constants.API_KEY}")
-            if (response != null) {
-                if (response.isSuccessful) {
-                    val jsonString = response.body()
-                    val json = JSONObject(jsonString)
-                    val asteroidListFromService = parseAsteroidsJsonResult(json)
-                    _asteroidList.value = asteroidListFromService
-                } else {
-                    Log.i("erro fetch", "!!!! ${response.body()}")
-                }
-            } else {
-                Log.i("time outr", "!!!! time out")
+            repository.fetchAsteroidsOnline("neo/rest/v1/feed?start_date=${DateTimeHelper.getCurrentDay()}&end_date=${DateTimeHelper.getEndDay()}&api_key=${Constants.API_KEY}")
+        }
+    }
+
+    fun fetchAsteroidsFromDB(){
+        viewModelScope.launch {
+            val list = repository.fetchAsterodoisFromDB()
+            if(!list.isNullOrEmpty()){
+                _asteroidList.value = list
             }
         }
     }
@@ -54,7 +54,7 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
                 val imgUrl = json["url"]
                 _picOfTheDayUrl.value = imgUrl as String?
             } else {
-                Log.i("img fetch", "!!!! ${response.code()}")
+                Log.i("img fetch", "${response.code()}")
             }
         }
     }

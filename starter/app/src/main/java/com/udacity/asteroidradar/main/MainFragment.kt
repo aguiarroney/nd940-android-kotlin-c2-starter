@@ -42,7 +42,8 @@ class MainFragment : Fragment(), MainFragmentAdapter.OnAsteroidItemClickListener
         setHasOptionsMenu(true)
 
         viewModel.fetchPichOfTheDay()
-        viewModel.fetchAsteroids()
+        viewModel.fetchAsteroidsOnline()
+        viewModel.fetchAsteroidsFromDB()
 
         viewModel.pictureOfDay.observe(viewLifecycleOwner, Observer {
             it?.let {
