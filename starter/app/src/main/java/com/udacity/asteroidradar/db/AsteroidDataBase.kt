@@ -4,10 +4,11 @@ import android.content.Context
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 
-@Database(entities = [AsteroidEntity::class], version = 1, exportSchema = false)
+@Database(entities = [AsteroidEntity::class, PictureOfTheDayEntity::class], version = 2)
 abstract class AsteroidDataBase : RoomDatabase() {
 
     abstract val asteroidDao: AsteroidDAO
+    abstract val pictureOfTheDayDAO: PictureOfTheDayDAO
 
     companion object {
         @Volatile

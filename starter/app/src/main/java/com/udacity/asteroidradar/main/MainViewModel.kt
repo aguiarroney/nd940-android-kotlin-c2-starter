@@ -6,6 +6,7 @@ import androidx.lifecycle.*
 import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.Constants
 import com.udacity.asteroidradar.DateTimeHelper
+import com.udacity.asteroidradar.PictureOfDay
 import com.udacity.asteroidradar.Repository.Repository
 import kotlinx.coroutines.launch
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
@@ -21,10 +22,11 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
     private val _navigationToDetial = MutableLiveData<Long>()
     val navigationToDetail get() = _navigationToDetial
 
+    //holds the pic of the day
     private val _picOfTheDayUrl = MutableLiveData<String>()
     val pictureOfDay get() = _picOfTheDayUrl
 
-    val repository:Repository by lazy {
+    val repository: Repository by lazy {
         val database = getInstance(getApplication())
         Repository(database)
     }
@@ -36,10 +38,10 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun fetchAsteroidsFromDB(){
+    fun fetchAsteroidsFromDB() {
         viewModelScope.launch {
             var list = repository.fetchAsterodoisFromDB()
-            if(list.isNullOrEmpty()){
+            if (list.isNullOrEmpty()) {
                 _fetchAsteroidsOnline()
             }
             list = repository.fetchAsterodoisFromDB()
@@ -47,18 +49,21 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun fetchPicOfTheDay() {
+    private fun _fetchPicOfTheDay() {
         viewModelScope.launch {
-            val response =
-                repository.fetchImgOfTheDay("planetary/apod?api_key=${Constants.API_KEY}")
-            if (response.isSuccessful) {
-                val jsonString = response.body()
-                val json = JSONObject(jsonString)
-                val imgUrl = json["url"]
-                _picOfTheDayUrl.value = imgUrl as String?
-            } else {
-                Log.i("img fetch", "${response.code()}")
+           repository.fetchImgOfTheDayOnline("planetary/apod?api_key=${Constants.API_KEY}")
+        }
+    }
+
+    fun fetchPicOfTheDayFromDB(){
+        viewModelScope.launch {
+            var img: PictureOfDay? = repository.fetchImgOfTheDayFromDB()
+            Log.i("imagem", "${img}")
+            if(img == null){
+                _fetchPicOfTheDay()
             }
+            img = repository.fetchImgOfTheDayFromDB()
+            _picOfTheDayUrl.value = img?.url.toString()
         }
     }
 

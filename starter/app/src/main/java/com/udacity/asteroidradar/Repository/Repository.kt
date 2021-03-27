@@ -1,17 +1,15 @@
 package com.udacity.asteroidradar.Repository
 
 import android.util.Log
-import com.squareup.picasso.Downloader
 import com.udacity.asteroidradar.Asteroid
+import com.udacity.asteroidradar.PictureOfDay
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
 import com.udacity.asteroidradar.db.AsteroidDataBase
 import com.udacity.asteroidradar.db.AsteroidEntity
-import kotlinx.coroutines.Deferred
+import com.udacity.asteroidradar.db.PictureOfTheDayEntity
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.invoke
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import retrofit2.Response
 
 class Repository(private val asteroidDataBase: AsteroidDataBase) {
 
@@ -58,7 +56,32 @@ class Repository(private val asteroidDataBase: AsteroidDataBase) {
         }
     }
 
-    suspend fun fetchImgOfTheDay(url: String): Response<String> {
-        return RetrofitInstance.nasaApi.fetchImgOfTheDay(url)
+    suspend fun fetchImgOfTheDayOnline(url: String) {
+        withContext(Dispatchers.IO) {
+            val response = RetrofitInstance.nasaApi.fetchImgOfTheDay(url)
+            if (response.isSuccessful) {
+                val jsonString = response.body()
+                val json = JSONObject(jsonString)
+                val pic = PictureOfTheDayEntity(
+                    1,
+                    json["media_type"].toString(),
+                    json["title"].toString(),
+                    json["url"].toString()
+                )
+                asteroidDataBase.pictureOfTheDayDAO.insert(pic)
+                Log.i("img fetch", "inseriu")
+            } else {
+                Log.i("img fetch", "${response.code()}")
+            }
+        }
+    }
+
+    suspend fun fetchImgOfTheDayFromDB(): PictureOfDay? {
+        return withContext(Dispatchers.IO) {
+            val picEntity: PictureOfTheDayEntity =
+                asteroidDataBase.pictureOfTheDayDAO.getPicFromDB()
+                    ?: return@withContext null
+            return@withContext PictureOfDay(picEntity.mediaType, picEntity.title, picEntity.url)
+        }
     }
 }
