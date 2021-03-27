@@ -23,7 +23,6 @@ class Repository(private val asteroidDataBase: AsteroidDataBase) {
                 val jsonString = response.body()
                 val json = JSONObject(jsonString)
                 val asteroidListFromService = parseAsteroidsJsonResult(json)
-                asteroidDataBase.asteroidDao.clear()
                 asteroidDataBase.asteroidDao.insert(asteroidListFromService.map {
                     AsteroidEntity(
                         id = it.id,

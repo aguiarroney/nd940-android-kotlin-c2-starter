@@ -14,6 +14,7 @@ import com.udacity.asteroidradar.db.AsteroidDataBase.Companion.getInstance
 
 class MainViewModel(private val app: Application) : AndroidViewModel(app) {
 
+    //holds the list of asteroids
     private val _asteroidList = MutableLiveData<List<Asteroid>>()
     val asteroidList: LiveData<List<Asteroid>> = _asteroidList
 
@@ -29,7 +30,7 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
     }
 
 
-    fun fetchAsteroidsOnline() {
+    private fun _fetchAsteroidsOnline() {
         viewModelScope.launch {
             repository.fetchAsteroidsOnline("neo/rest/v1/feed?start_date=${DateTimeHelper.getCurrentDay()}&end_date=${DateTimeHelper.getEndDay()}&api_key=${Constants.API_KEY}")
         }
@@ -37,14 +38,16 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
 
     fun fetchAsteroidsFromDB(){
         viewModelScope.launch {
-            val list = repository.fetchAsterodoisFromDB()
-            if(!list.isNullOrEmpty()){
-                _asteroidList.value = list
+            var list = repository.fetchAsterodoisFromDB()
+            if(list.isNullOrEmpty()){
+                _fetchAsteroidsOnline()
             }
+            list = repository.fetchAsterodoisFromDB()
+            _asteroidList.value = list
         }
     }
 
-    fun fetchPichOfTheDay() {
+    fun fetchPicOfTheDay() {
         viewModelScope.launch {
             val response =
                 repository.fetchImgOfTheDay("planetary/apod?api_key=${Constants.API_KEY}")

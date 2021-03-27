@@ -3,12 +3,13 @@ package com.udacity.asteroidradar.db
 import android.util.Log
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.udacity.asteroidradar.Asteroid
 
 @Dao
 interface AsteroidDAO {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(asteroid: List<AsteroidEntity>)
 
     @Query("SELECT * FROM asteroid_table WHERE id = :key")
