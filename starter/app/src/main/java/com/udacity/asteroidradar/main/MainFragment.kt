@@ -84,6 +84,17 @@ class MainFragment : Fragment(), MainFragmentAdapter.OnAsteroidItemClickListener
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.show_all_menu -> {
+                viewModel.filterWeekAsteroids()
+            }
+            R.id.show_rent_menu -> {
+                viewModel.filterTodayAsteroids()
+            }
+            else -> {
+                viewModel.showAllAsteroids()
+            }
+        }
         return true
     }
 

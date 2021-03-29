@@ -1,5 +1,6 @@
 package com.udacity.asteroidradar
 
+import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -9,6 +10,7 @@ object DateTimeHelper  {
         val calendar = Calendar.getInstance()
         val currentTime = calendar.time
         val dateFormat = SimpleDateFormat(Constants.API_QUERY_DATE_FORMAT, Locale.getDefault())
+        Timber.i("!!!! ${dateFormat.format(currentTime)}")
         return dateFormat.format(currentTime)
     }
 

@@ -81,6 +81,28 @@ class MainViewModel(private val app: Application) : AndroidViewModel(app) {
         _navigationToDetial.value = null
     }
 
+    fun filterWeekAsteroids() {
+        viewModelScope.launch {
+            val list = repository.getWeekAsteroidsFromDB()
+            if (!list.isNullOrEmpty()) {
+                _asteroidList.value = list
+            }
+        }
+    }
+
+    fun filterTodayAsteroids() {
+        viewModelScope.launch {
+            val list = repository.getTodayAsteroidsFromDB()
+            if (!list.isNullOrEmpty()) {
+                _asteroidList.value = list
+            }
+        }
+    }
+
+    fun showAllAsteroids() {
+        fetchAsteroidsFromDB()
+    }
+
     class Factory(private val application: Application) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(MainViewModel::class.java)) {

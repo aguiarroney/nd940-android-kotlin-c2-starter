@@ -1,10 +1,9 @@
 package com.udacity.asteroidradar.Repository
 
 import android.util.Log
-import com.udacity.asteroidradar.Asteroid
-import com.udacity.asteroidradar.Constants
-import com.udacity.asteroidradar.DateTimeHelper
-import com.udacity.asteroidradar.PictureOfDay
+import androidx.databinding.library.baseAdapters.BuildConfig
+import com.udacity.asteroidradar.*
+import com.udacity.asteroidradar.BuildConfig.API_KEY
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
 import com.udacity.asteroidradar.db.AsteroidDataBase
 import com.udacity.asteroidradar.db.AsteroidEntity
@@ -21,7 +20,7 @@ class Repository(private val asteroidDataBase: AsteroidDataBase) {
         return try {
             withContext(Dispatchers.IO) {
                 val response =
-                    RetrofitInstance.nasaApi.fetchAsteroidsOnline("neo/rest/v1/feed?start_date=${DateTimeHelper.getCurrentDay()}&end_date=${DateTimeHelper.getEndDay()}&api_key=${Constants.API_KEY}")
+                    RetrofitInstance.nasaApi.fetchAsteroidsOnline("neo/rest/v1/feed?start_date=${DateTimeHelper.getCurrentDay()}&end_date=${DateTimeHelper.getEndDay()}&api_key=${API_KEY}")
                 if (response.isSuccessful) {
                     val jsonString = response.body()
                     val json = JSONObject(jsonString)
@@ -38,7 +37,7 @@ class Repository(private val asteroidDataBase: AsteroidDataBase) {
                             isPotentiallyHazardous = it.isPotentiallyHazardous
                         )
                     })
-                    Log.i("DATABASE", "Inseriu no DB")
+                    Timber.i("Inseriu no DB")
                     return@withContext true
                 }
                 return@withContext false
@@ -70,7 +69,7 @@ class Repository(private val asteroidDataBase: AsteroidDataBase) {
         return try {
             withContext(Dispatchers.IO) {
                 val response =
-                    RetrofitInstance.nasaApi.fetchImgOfTheDay("planetary/apod?api_key=${Constants.API_KEY}")
+                    RetrofitInstance.nasaApi.fetchImgOfTheDay("planetary/apod?api_key=${API_KEY}")
                 if (response.isSuccessful) {
                     val jsonString = response.body()
                     val json = JSONObject(jsonString)
@@ -101,9 +100,49 @@ class Repository(private val asteroidDataBase: AsteroidDataBase) {
         }
     }
 
-    suspend fun deledOldDataFromDB (){
-        withContext(Dispatchers.IO){
+    suspend fun deledOldDataFromDB() {
+        withContext(Dispatchers.IO) {
             asteroidDataBase.asteroidDao.deleteOldData(DateTimeHelper.getCurrentDay())
+        }
+    }
+
+    suspend fun getTodayAsteroidsFromDB(): List<Asteroid>? {
+        return withContext(Dispatchers.IO) {
+            asteroidDataBase.asteroidDao.getTodayAsteroids(DateTimeHelper.getCurrentDay())?.map {
+                Asteroid(
+                    id = it.id,
+                    codename = it.codename,
+                    closeApproachDate = it.closeApproachDate,
+                    absoluteMagnitude = it.absoluteMagnitude,
+                    estimatedDiameter = it.estimatedDiameter,
+                    relativeVelocity = it.relativeVelocity,
+                    distanceFromEarth = it.distanceFromEarth,
+                    isPotentiallyHazardous = it.isPotentiallyHazardous
+                )
+            }
+        }
+    }
+
+    suspend fun getWeekAsteroidsFromDB(): List<Asteroid>?{
+        return withContext(Dispatchers.IO) {
+            asteroidDataBase.asteroidDao.getWeekAsteroids(DateTimeHelper.getCurrentDay(), DateTimeHelper.getEndDay())?.map {
+                Asteroid(
+                    id = it.id,
+                    codename = it.codename,
+                    closeApproachDate = it.closeApproachDate,
+                    absoluteMagnitude = it.absoluteMagnitude,
+                    estimatedDiameter = it.estimatedDiameter,
+                    relativeVelocity = it.relativeVelocity,
+                    distanceFromEarth = it.distanceFromEarth,
+                    isPotentiallyHazardous = it.isPotentiallyHazardous
+                )
+            }
+        }
+    }
+
+    suspend fun clearData(){
+        withContext(Dispatchers.IO){
+            asteroidDataBase.asteroidDao.clear()
         }
     }
 }
